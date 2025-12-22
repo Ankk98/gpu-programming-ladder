@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPU Programming Ladder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            // Using Zinc for a cleaner, more neutral technical feel
+            gray: {
+              50: '#fafafa',
+              100: '#f4f4f5',
+              200: '#e4e4e7',
+              300: '#d4d4d8',
+              400: '#a1a1aa',
+              500: '#71717a',
+              600: '#52525b',
+              700: '#3f3f46',
+              800: '#27272a',
+              900: '#18181b',
+              950: '#09090b',
+            },
+            // Cyan for a high-performance "GPU/Tech" look
+            primary: {
+              300: '#67e8f9',
+              400: '#22d3ee',
+              500: '#06b6d4',
+              600: '#0891b2',
+              700: '#0e7490',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar for webkit */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans antialiased selection:bg-primary-500/30">
+  <div class="max-w-7xl mx-auto px-4 py-8 pb-12 flex flex-col gap-8">
+
+    <!-- Header -->
+    <header
+      class="flex flex-col md:flex-row md:justify-between md:items-start gap-6 border-b border-gray-200 dark:border-gray-800 pb-6">
+      <div class="flex flex-col gap-2">
+        <h1
+          class="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+          GPU Programming Ladder
+        </h1>
+        <div class="text-base text-gray-600 dark:text-gray-400 max-w-2xl leading-relaxed">
+          A progressive checklist for obtaining GPU optimization mastery.
+          From CUDA basics to FlashAttention and LLM kernels.
+          <div class="mt-2 flex flex-wrap items-center gap-3 text-sm">
+            <span
+              class="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-medium">
+              ⚠️ Work in progress
+            </span>
+            <a href="https://github.com/ankk98/gpu-programming-ladder"
+              class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors inline-flex items-center gap-1">
+              Contribute on GitHub <span>→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-end gap-3">
+        <div
+          class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-900 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-800">
+          <span class="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
+          Progress saved locally
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="resetProgressBtn" type="button"
+            class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-800 outline-none">
+            Reset
+          </button>
+          <button id="markPhaseCompleteBtn" type="button"
+            class="px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 hover:bg-primary-500 text-white shadow-lg shadow-primary-500/20 transition-all focus:ring-2 focus:ring-primary-500/50 outline-none">
+            Mark Phase Complete
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
+
+      <!-- Sidebar -->
+      <aside class="flex flex-col gap-6 lg:sticky lg:top-8">
+        <div
+          class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
+          <div
+            class="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+            <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Roadmap
+              Phases</span>
+          </div>
+          <ul id="phaseList" class="flex flex-col p-2 gap-1 list-none m-0 max-h-[60vh] overflow-y-auto"></ul>
+        </div>
+
+        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm">
+          <div class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">Status Legend
+          </div>
+          <div class="flex flex-col gap-2.5 text-sm">
+            <span class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <span
+                class="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-700 ring-4 ring-gray-100 dark:ring-gray-800"></span>Not
+              started
+            </span>
+            <span class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 ring-4 ring-amber-500/10"></span>In progress
+            </span>
+            <span class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/10"></span>Completed
+            </span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <section class="flex flex-col gap-6 min-w-0">
+
+        <!-- Active Phase Card -->
+        <div
+          class="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden">
+          <div
+            class="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+          </div>
+
+          <div class="relative z-10 flex flex-col gap-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <h2 id="phaseName" class="text-2xl font-bold text-gray-900 dark:text-white"></h2>
+              <span id="phaseTag"
+                class="self-start md:self-auto text-xs font-semibold px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 uppercase tracking-wide"></span>
+            </div>
+
+            <p id="phaseDesc" class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed max-w-3xl"></p>
+
+            <div class="mt-2 p-4 rounded-xl bg-gray-50 dark:bg-gray-950/50 border border-gray-100 dark:border-gray-800">
+              <div class="flex justify-between text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                <span id="phaseProgressSummary"></span>
+                <span id="phaseProgressPercent" class="text-primary-600 dark:text-primary-400"></span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
+                <div id="phaseProgressFill"
+                  class="h-full rounded-full bg-primary-500 transition-all duration-500 ease-out" style="width: 0%">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topics -->
+        <div id="topicsContainer" class="flex flex-col gap-4">
+          <!-- Topics rendered dynamically -->
+        </div>
+
+        <div class="text-sm text-gray-500 dark:text-gray-500 text-center py-8">
+          Some advanced topics marked <strong>"needs more work"</strong> indicate placeholders for emerging resources.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
