@@ -88,36 +88,69 @@ class URLValidationOrchestrator:
             task_batches.append(tasks[start_idx:end_idx])
             start_idx = end_idx
 
-        # Run agents concurrently
+        # Run agents concurrently with error handling
         agent_coroutines = []
         for i, task_batch in enumerate(task_batches):
             agent_id = f"agent_{i+1}"
             coroutine = self._run_single_agent(agent_id, task_batch)
             agent_coroutines.append(coroutine)
 
-        await asyncio.gather(*agent_coroutines)
+        # Use return_exceptions=True to prevent cancellation propagation
+        # This ensures that if one agent fails or gets cancelled, others continue
+        agent_results = await asyncio.gather(*agent_coroutines, return_exceptions=True)
+
+        # Handle any exceptions that occurred
+        for i, result in enumerate(agent_results):
+            agent_id = f"agent_{i+1}"
+            if isinstance(result, Exception):
+                print(f"❌ Agent {agent_id} failed with error: {str(result)}")
+                # Still update stats for failed agent
+                with self.lock:
+                    self.agent_stats[agent_id] = {
+                        'tasks_processed': 0,
+                        'total_urls': len(task_batches[i]),
+                        'error': str(result)
+                    }
 
     async def _run_single_agent(self, agent_id: str, tasks: List[Dict[str, Any]]):
         """Run a single consumer agent."""
         print(f"   🟢 Agent {agent_id} starting with {len(tasks)} tasks")
 
-        async with URLValidatorAgent(
-            agent_id=agent_id,
-            lm_studio_url=self.lm_studio_url,
-            max_concurrent_requests=self.max_concurrent_requests_per_agent
-        ) as agent:
+        try:
+            async with URLValidatorAgent(
+                agent_id=agent_id,
+                lm_studio_url=self.lm_studio_url,
+                max_concurrent_requests=self.max_concurrent_requests_per_agent
+            ) as agent:
 
-            processed_tasks = await agent.process_tasks(tasks)
+                processed_tasks = await agent.process_tasks(tasks)
 
-            # Thread-safe update of completed tasks
+                # Thread-safe update of completed tasks
+                with self.lock:
+                    self.completed_tasks.extend(processed_tasks)
+                    self.agent_stats[agent_id] = {
+                        'tasks_processed': len(processed_tasks),
+                        'total_urls': len(tasks)
+                    }
+
+            print(f"   ✅ Agent {agent_id} completed {len(processed_tasks)} tasks")
+
+        except asyncio.CancelledError:
+            # Handle cancellation gracefully - agent should still save partial results
+            print(f"⚠️  Agent {agent_id} was cancelled, attempting to save partial results...")
+            # Note: The agent's context manager should handle cleanup
+            raise  # Re-raise to let caller know it was cancelled
+
+        except Exception as e:
+            print(f"❌ Agent {agent_id} failed: {str(e)}")
+            # Update stats with error info
             with self.lock:
-                self.completed_tasks.extend(processed_tasks)
                 self.agent_stats[agent_id] = {
-                    'tasks_processed': len(processed_tasks),
-                    'total_urls': len(tasks)
+                    'tasks_processed': 0,
+                    'total_urls': len(tasks),
+                    'error': str(e)
                 }
-
-        print(f"   ✅ Agent {agent_id} completed {len(processed_tasks)} tasks")
+            raise  # Re-raise to let caller handle the error
 
     async def _save_results(self):
         """Save validation results to file."""

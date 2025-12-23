@@ -110,39 +110,33 @@ def test_system():
     """Run basic system tests."""
     print("🧪 Running system tests...")
 
-    # Test imports
-    try:
-        import sys
-        sys.path.insert(0, '.')
+    # Test imports in virtual environment
+    test_cmd = """
+source gpu_ladder_env/bin/activate && python3 -c "
+import sys
+sys.path.insert(0, '.')
 
-        # Test basic imports
-        import json
-        import asyncio
-        import aiohttp
+# Test basic imports
+import json
+import asyncio
+import aiohttp
+print('✅ Basic imports successful')
 
-        print("✅ Basic imports successful")
+# Test custom modules
+from url_extractor import extract_urls_from_data_js
+from task_creator_agent import TaskCreatorAgent
+print('✅ Custom module imports successful')
 
-        # Test custom modules
-        from url_extractor import extract_urls_from_data_js
-        from task_creator_agent import TaskCreatorAgent
-
-        print("✅ Custom module imports successful")
-
-        # Test data extraction
-        if os.path.exists("../data.js"):
-            urls = extract_urls_from_data_js("../data.js")
-            print(f"✅ URL extraction successful: {len(urls)} URLs found")
-        else:
-            print("⚠️  data.js not found - skipping URL extraction test")
-
-        return True
-
-    except ImportError as e:
-        print(f"❌ Import error: {e}")
-        return False
-    except Exception as e:
-        print(f"❌ Test error: {e}")
-        return False
+# Test data extraction
+import os
+if os.path.exists('../data.js'):
+    urls = extract_urls_from_data_js('../data.js')
+    print(f'✅ URL extraction successful: {len(urls)} URLs found')
+else:
+    print('⚠️  data.js not found - skipping URL extraction test')
+"
+"""
+    return run_command(test_cmd, "Testing system functionality")
 
 
 def main():

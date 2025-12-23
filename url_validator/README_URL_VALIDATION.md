@@ -91,18 +91,58 @@ data.js → URL Extractor → Task Creator → Consumer Agents → Results → d
 {
   "lm_studio": {
     "url": "http://localhost:1234",
-    "model": "gpt-oss-20b"
+    "model": "gpt-oss-20b",
+    "timeout": 120,
+    "max_tokens": 200,
+    "temperature": 0.1
   },
+
+  // timeout: Seconds to wait for LLM response (default: 120 = 2 minutes)
+  // max_tokens: Maximum tokens in LLM response for content analysis and replacement finding
+  // temperature: Creativity/randomness in LLM responses (0.0 = deterministic, 1.0 = creative)
   "agents": {
     "num_consumer_agents": 3,
-    "max_concurrent_requests_per_agent": 5
+    "max_concurrent_requests_per_agent": 5,
+    "request_timeout": 30,
+    "rate_limit_delay": 1.0
   },
   "processing": {
     "update_data_js": true,
-    "force_revalidation": false
+    "force_revalidation": false,
+    "batch_size": 50,
+    "max_retries": 3
+  },
+  "validation_rules": {
+    "check_existence": true,
+    "check_content_appropriateness": true,
+    "use_llm_content_analysis": true,
+    "llm_analysis_fallback": true,
+    "require_specific_content": ["exercise", "video"],
+    "allow_listing_pages": ["article", "paper"],
+    "github_repo_depth_check": true
   }
 }
 ```
+
+### LLM Content Analysis
+
+The system now supports intelligent content analysis using LLM (Large Language Models):
+
+- **LLM Analysis**: Uses GPT models to evaluate content appropriateness based on:
+  - Topic relevance to GPU programming
+  - Content specificity vs. listing pages
+  - Educational value assessment
+  - URL type appropriateness (article, video, exercise, etc.)
+
+- **Configuration Options**:
+  - `use_llm_content_analysis`: Enable/disable LLM-based analysis
+  - `llm_analysis_fallback`: Use heuristic analysis if LLM fails
+
+- **Analysis Features**:
+  - Evaluates content based on specific criteria for each URL type
+  - Assesses educational value and relevance scores
+  - Provides detailed reasoning for appropriateness decisions
+  - Handles various content types (articles, videos, exercises, code)
 
 ### Validation Rules
 
