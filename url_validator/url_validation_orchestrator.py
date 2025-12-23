@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 
 from task_creator_agent import TaskCreatorAgent
-from url_validator_agent import URLValidatorAgent
+from url_validator_agent import GenericContentValidatorAgent
 
 
 class URLValidationOrchestrator:
@@ -61,14 +61,14 @@ class URLValidationOrchestrator:
         print("\n🤖 Step 2: Starting consumer agents...")
         await self._run_consumer_agents(tasks)
 
-        # Step 3: Save results
-        print("\n💾 Step 3: Saving validation results...")
-        await self._save_results()
-
-        # Step 4: Generate summary
+        # Step 3: Generate summary (results already saved incrementally)
         summary = self._generate_summary()
-        print("\n📊 Step 4: Validation complete!")
+        print("\n📊 Step 3: Validation complete!")
         self._print_summary(summary)
+
+        # Step 4: Final results save (overwrite with complete metadata)
+        print("\n💾 Step 4: Saving final results...")
+        await self._save_results()
 
         return summary
 
@@ -117,7 +117,7 @@ class URLValidationOrchestrator:
         print(f"   🟢 Agent {agent_id} starting with {len(tasks)} tasks")
 
         try:
-            async with URLValidatorAgent(
+            async with GenericContentValidatorAgent(
                 agent_id=agent_id,
                 lm_studio_url=self.lm_studio_url,
                 max_concurrent_requests=self.max_concurrent_requests_per_agent
@@ -132,6 +132,9 @@ class URLValidationOrchestrator:
                         'tasks_processed': len(processed_tasks),
                         'total_urls': len(tasks)
                     }
+
+                    # Save results incrementally after each agent completes
+                    await self._save_results()
 
             print(f"   ✅ Agent {agent_id} completed {len(processed_tasks)} tasks")
 

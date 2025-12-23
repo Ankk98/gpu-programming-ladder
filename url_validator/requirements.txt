@@ -20,7 +20,14 @@ tqdm
 pydantic
 python-dotenv
 
-# Optional: MCP tools (uncomment if using MCP)
-# mcp
-# mcp-firecrawl
-# mcp-context7
+# Rate limiting and async utilities
+aiohttp-retry
+tenacity
+
+# Web scraping and parsing
+html5lib
+regex
+
+# API clients
+firecrawl-py
+brave-search

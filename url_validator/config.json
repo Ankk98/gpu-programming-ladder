@@ -9,7 +9,8 @@
     "model": "openai/gpt-oss-20b",
     "timeout": 120,
     "max_tokens": 500,
-    "temperature": 0.1
+    "temperature": 0.1,
+    "max_iterations": 10
   },
   "agents": {
     "num_consumer_agents": 2,
@@ -47,7 +48,7 @@
   "external_apis": {
     "firecrawl": {
       "enabled": false,
-      "api_key": "your-firecrawl-api-key-here",
+      "api_key": "fc-your-api-key-here",
       "base_url": "https://api.firecrawl.dev"
     },
     "brave_search": {
@@ -56,12 +57,16 @@
       "base_url": "https://api.search.brave.com"
     }
   },
-  "mcp_tools": {
-    "enabled": false,
-    "servers": {
-      "firecrawl": "http://localhost:3000",
-      "context7": "http://localhost:3001",
-      "brave_search": "http://localhost:3002"
+  "rate_limiting": {
+    "firecrawl": {
+      "requests_per_minute": 10,
+      "burst_limit": 3,
+      "backoff_seconds": 60
+    },
+    "brave_search": {
+      "requests_per_minute": 5,
+      "burst_limit": 2,
+      "backoff_seconds": 30
     }
   }
 }

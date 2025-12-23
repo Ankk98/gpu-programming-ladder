@@ -94,12 +94,14 @@ data.js → URL Extractor → Task Creator → Consumer Agents → Results → d
     "model": "gpt-oss-20b",
     "timeout": 120,
     "max_tokens": 200,
-    "temperature": 0.1
+    "temperature": 0.1,
+    "max_iterations": 5
   },
 
   // timeout: Seconds to wait for LLM response (default: 120 = 2 minutes)
   // max_tokens: Maximum tokens in LLM response for content analysis and replacement finding
   // temperature: Creativity/randomness in LLM responses (0.0 = deterministic, 1.0 = creative)
+  // max_iterations: Maximum number of LLM reasoning iterations for URL validation (default: 5)
   "agents": {
     "num_consumer_agents": 3,
     "max_concurrent_requests_per_agent": 5,
@@ -148,9 +150,10 @@ The system now supports intelligent content analysis using LLM (Large Language M
 
 - **URL Existence**: All URLs must be accessible (HTTP 2xx/3xx)
 - **Content Appropriateness**:
-  - Exercise URLs: Must point to specific exercises, not listings
-  - Video URLs: Must point to specific videos, not channels/playlists
-  - Article URLs: Can be specific articles or curated lists
+  - **Exercise URLs**: Must contain specific, actionable exercises or puzzles (e.g., `https://leetgpu.com/challenges/vector-addition` not just `https://leetgpu.com/challenges`)
+  - **Video URLs**: Must point to specific videos, not channels/playlists
+  - **Article URLs**: Can be specific articles or curated lists with educational value
+  - **Intelligent Analysis**: LLM evaluates content quality based on URL type and actual content analysis
 - **Replacement Strategy**: Use AI to find high-quality alternatives
 
 ### Rate Limiting & Performance
@@ -169,6 +172,8 @@ For enhanced functionality, integrate MCP (Model Context Protocol) tools:
 1. **Firecrawl** - Advanced web scraping and content extraction
 2. **Context7** - Library documentation search
 3. **Brave Search** - Web search capabilities
+
+> **Note**: Consider using [Crawl4AI](https://github.com/unclecode/crawl4ai) and DuckDuckGo search instead of Firecrawl for future implementations. Crawl4AI is an open-source LLM-friendly web crawler that provides better control and privacy compared to commercial alternatives.
 
 ### Setup MCP Integration
 
