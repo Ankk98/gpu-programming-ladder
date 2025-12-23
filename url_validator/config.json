@@ -1,0 +1,47 @@
+{
+  "system": {
+    "name": "GPU Programming Ladder URL Validator",
+    "version": "1.0.0",
+    "description": "AI-powered URL validation system for GPU programming educational content"
+  },
+  "lm_studio": {
+    "url": "http://localhost:1234",
+    "model": "gpt-4o-20b",
+    "timeout": 60,
+    "max_tokens": 200,
+    "temperature": 0.1
+  },
+  "agents": {
+    "num_consumer_agents": 3,
+    "max_concurrent_requests_per_agent": 5,
+    "request_timeout": 30,
+    "rate_limit_delay": 1.0
+  },
+  "files": {
+    "data_js": "data.js",
+    "urls_to_validate": "urls_to_validate.json",
+    "validation_tasks": "validation_tasks.json",
+    "validation_results": "validation_results.json"
+  },
+  "processing": {
+    "update_data_js": true,
+    "force_revalidation": false,
+    "batch_size": 50,
+    "max_retries": 3
+  },
+  "validation_rules": {
+    "check_existence": true,
+    "check_content_appropriateness": true,
+    "require_specific_content": ["exercise", "video"],
+    "allow_listing_pages": ["article", "paper"],
+    "github_repo_depth_check": true
+  },
+  "mcp_tools": {
+    "enabled": false,
+    "servers": {
+      "firecrawl": "http://localhost:3000",
+      "context7": "http://localhost:3001",
+      "brave_search": "http://localhost:3002"
+    }
+  }
+}

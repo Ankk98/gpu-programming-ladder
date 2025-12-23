@@ -1,0 +1,26 @@
+# Core dependencies
+llama-deploy
+requests
+aiohttp
+asyncio
+beautifulsoup4
+lxml
+json5
+
+# Jupyter and development
+jupyter
+notebook
+
+# HTTP and async utilities
+httpx
+aiofiles
+
+# Data processing
+tqdm
+pydantic
+python-dotenv
+
+# Optional: MCP tools (uncomment if using MCP)
+# mcp
+# mcp-firecrawl
+# mcp-context7
